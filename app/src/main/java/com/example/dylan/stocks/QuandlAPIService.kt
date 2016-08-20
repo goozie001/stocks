@@ -3,10 +3,14 @@ package com.example.dylan.stocks
 import android.util.Log
 import org.jetbrains.anko.async
 import org.jetbrains.anko.uiThread
+import org.json.JSONObject
 import java.net.URL
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.*
 
 interface QuandlAPIHandler {
-    fun handleAPIResponse(retval: String?, statusCode: String)
+    fun handleAPIResponse(quotes: ArrayList<StockQuote>)
 }
 
 /**
@@ -27,13 +31,13 @@ class QuandlAPIService private constructor() {
         // Do any setup required here
     }
 
-    private object mQuindlAPIService { val INSTANCE = QuandlAPIService() }
+    private object mQuandlAPIService { val INSTANCE = QuandlAPIService() }
 
     // Companion object to call methods in static context (in this case,
     // only the instance of QuandlAPIService is needed in static context to
     // access the singleton object
     companion object {
-        val instance: QuandlAPIService by lazy { mQuindlAPIService.INSTANCE }
+        val instance: QuandlAPIService by lazy { mQuandlAPIService.INSTANCE }
     }
 
     /**
@@ -42,13 +46,56 @@ class QuandlAPIService private constructor() {
      * @param handler       The class that implements the QuandlAPIHandler interface; this class
      *                      will actually process the data fetched by the QuandlAPI Service
      */
-    fun asyncEODQuoteRequest(tradeSymbol: String, handler: QuandlAPIHandler): Unit {
+    fun asyncEODQuoteRequest(handler: QuandlAPIHandler, tradeSymbols: Array<String>): Unit {
+        val quotes: ArrayList<StockQuote> = ArrayList(tradeSymbols.size)
         async() {
-            val result = URL(WIKI_DATABASE + tradeSymbol + ".json" + APPENDED_KEY).readText()
-            
+            val date = getLatestMarketDateForEOD()
+            for (ts in tradeSymbols) {
+                val queryString = "$WIKI_DATABASE$ts/data.json$APPENDED_KEY&start_date=$date&end_date=$date" // 215.21
+                Log.d(TAG, queryString)
+                val response = JSONObject(URL(queryString).readText())
+                val data = response.getJSONObject("dataset_data").getJSONArray("data")
+                val quote = JSONObject()
+                quote.put(StockQuote.SYMBOL, ts)
+                quote.put(StockQuote.DATA, data)
+                quotes.add(StockQuote(quote))
+            }
             uiThread {
-                handler.handleAPIResponse(result, "OK");
+                handler.handleAPIResponse(quotes);
             }
         }
+    }
+
+    /**
+     * Utility function that returns the correct date for the most recent EOD stock quotes in the
+     * format of yyyy-MM-DD
+     */
+    private fun getLatestMarketDateForEOD(): String {
+        val ESTCal = GregorianCalendar(TimeZone.getTimeZone("America/New_York"))
+        val marketDay = ESTCal.get(Calendar.DAY_OF_WEEK)
+
+        // Handle weekends
+        if (marketDay == Calendar.SATURDAY)
+        {
+            ESTCal.add(Calendar.DATE, -1)
+        }
+        else if (marketDay == Calendar.SUNDAY)
+        {
+            ESTCal.add(Calendar.DATE, -2)
+        }
+        else
+        {
+            val marketHr = ESTCal.get(Calendar.HOUR_OF_DAY)
+            // Before market closes for the day, we must get yesterday's EOD quote
+            if (marketHr < 17)
+            {
+                if (marketDay == Calendar.MONDAY)
+                    ESTCal.add(Calendar.DATE, -3)
+                else
+                    ESTCal.add(Calendar.DATE, -1)
+            }
+        }
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale("US"))
+        return sdf.format(ESTCal.time)
     }
 }
