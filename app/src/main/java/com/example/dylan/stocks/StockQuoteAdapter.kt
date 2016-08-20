@@ -1,7 +1,5 @@
 package com.example.dylan.stocks
 
-import android.app.LauncherActivity
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,30 +15,33 @@ import java.util.*
  * Adapter for listing a group of stocks in the main view of application
  */
 
-class StockViewHolder constructor(sym: TextView, symVal: TextView){
-    val mSymbol : TextView
-    val mSymVal : TextView
+class StockViewHolder constructor(symbol: TextView, name: TextView, value: TextView) {
+    val symbol: TextView
+    val name: TextView
+    val value: TextView
 
     init {
-        mSymbol = sym
-        mSymVal = symVal
+        this.symbol = symbol
+        this.name = name
+        this.value = value
     }
 
 }
 
-class StockQuoteListAdapter(ctx: Context) : BaseAdapter() {
+class StockQuoteListAdapter() : BaseAdapter() {
     private var quoteList = ArrayList<StockQuote>()
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
 
-        val mHolder: StockViewHolder?
+        val mHolder: StockViewHolder
         val mView: View
 
         if (convertView == null) {
             mView = LayoutInflater.from(parent!!.context).inflate(R.layout.stock_item, parent, false)
-            val symText = mView.stock_name
+            val symText = mView.stock_sym
             val valText = mView.stock_val
-            mHolder = StockViewHolder(symText, valText)
+            val nameText = mView.stock_name
+            mHolder = StockViewHolder(symText, valText, nameText)
             mView.tag = mHolder
         }
         else {
@@ -49,8 +50,9 @@ class StockQuoteListAdapter(ctx: Context) : BaseAdapter() {
         }
         val quote: StockQuote = quoteList[position]
 
-        mHolder.mSymbol.text = quote.symVal
-        mHolder.mSymVal.text = quote.data.toString()
+        mHolder.symbol.text = quote.symbol
+        mHolder.value.text = quote.value.toString()
+        mHolder.name.text = quote.name
 
         return mView
     }

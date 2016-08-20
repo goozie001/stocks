@@ -9,21 +9,16 @@ import org.json.JSONObject
  * A model that contains any information relevant to a single stock quote
  */
 
-class StockQuote constructor(quoteJSON: JSONObject) {
+class StockQuote constructor(symbol: String, name: String, quotes: JSONArray) {
 
-    val symVal: String
-    val data: Double
-
-    companion object {
-        val SYMBOL = "sym"
-        val DATA = "data"
-    }
+    val symbol: String
+    val value: Double
+    val name: String
 
     init
     {
-        symVal = quoteJSON.getString(SYMBOL)
-        val dataArray = quoteJSON.getJSONArray(DATA)[0]
-        val dataArrayLength = (dataArray as JSONArray).length()
-        data = dataArray[dataArrayLength - 2] as Double
+        this.symbol = symbol
+        this.name = name
+        this.value = quotes[quotes.length() - 2] as Double
     }
 }

@@ -33,7 +33,7 @@ class MainActivity : Activity(), QuandlAPIHandler {
             }
         }
 
-        quoteListAdapter = StockQuoteListAdapter(quoteList.context)
+        quoteListAdapter = StockQuoteListAdapter()
         quoteList.adapter = quoteListAdapter
 
         mAPIService.asyncEODQuoteRequest(this, arrayOf("A", "AA", "ACM", "AAPL", "GOOGL", "NVDA", "TSLA"))

@@ -3,6 +3,7 @@ package com.example.dylan.stocks
 import android.util.Log
 import org.jetbrains.anko.async
 import org.jetbrains.anko.uiThread
+import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URL
 import java.text.DateFormat
@@ -51,14 +52,13 @@ class QuandlAPIService private constructor() {
         async() {
             val date = getLatestMarketDateForEOD()
             for (ts in tradeSymbols) {
-                val queryString = "$WIKI_DATABASE$ts/data.json$APPENDED_KEY&start_date=$date&end_date=$date" // 215.21
+                val queryString = "$WIKI_DATABASE$ts.json$APPENDED_KEY&start_date=$date&end_date=$date" // 215.21
                 Log.d(TAG, queryString)
                 val response = JSONObject(URL(queryString).readText())
-                val data = response.getJSONObject("dataset_data").getJSONArray("data")
-                val quote = JSONObject()
-                quote.put(StockQuote.SYMBOL, ts)
-                quote.put(StockQuote.DATA, data)
-                quotes.add(StockQuote(quote))
+                val dataset = response.getJSONObject("dataset")
+                val quoteData = dataset.getJSONArray("data")[0] as JSONArray
+                val name = dataset.getString("name")
+                quotes.add(StockQuote(ts, name, quoteData))
             }
             uiThread {
                 handler.handleAPIResponse(quotes);
