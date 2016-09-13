@@ -1,5 +1,6 @@
 package com.example.dylan.stocks
 
+import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -11,6 +12,8 @@ import org.json.JSONObject
 
 class StockQuote constructor(symbol: String, name: String, quotes: JSONArray) {
 
+    val tag: String = "StockQuote"
+
     val symbol: String
     val value: Double
     val name: String
@@ -19,6 +22,8 @@ class StockQuote constructor(symbol: String, name: String, quotes: JSONArray) {
     {
         this.symbol = symbol
         this.name = name
-        this.value = quotes[quotes.length() - 2] as Double
+        Log.d(tag, quotes.toString())
+        // Round to two decimal places
+        this.value = Math.round(quotes[quotes.length() - 2] as Double * 100.0) / 100.0
     }
 }

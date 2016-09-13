@@ -15,14 +15,12 @@ import java.util.*
  * Adapter for listing a group of stocks in the main view of application
  */
 
-class StockViewHolder constructor(symbol: TextView, name: TextView, value: TextView) {
+class StockViewHolder constructor(symbol: TextView,  value: TextView) {
     val symbol: TextView
-    val name: TextView
     val value: TextView
 
     init {
         this.symbol = symbol
-        this.name = name
         this.value = value
     }
 
@@ -40,8 +38,7 @@ class StockQuoteListAdapter() : BaseAdapter() {
             mView = LayoutInflater.from(parent!!.context).inflate(R.layout.stock_item, parent, false)
             val symText = mView.stock_sym
             val valText = mView.stock_val
-            val nameText = mView.stock_name
-            mHolder = StockViewHolder(symText, valText, nameText)
+            mHolder = StockViewHolder(symText, valText)
             mView.tag = mHolder
         }
         else {
@@ -52,7 +49,6 @@ class StockQuoteListAdapter() : BaseAdapter() {
 
         mHolder.symbol.text = quote.symbol
         mHolder.value.text = quote.value.toString()
-        mHolder.name.text = quote.name
 
         return mView
     }

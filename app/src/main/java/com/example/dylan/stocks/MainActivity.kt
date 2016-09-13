@@ -2,6 +2,7 @@ package com.example.dylan.stocks
 
 import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import android.widget.ListView
 import org.jetbrains.anko.*
 import java.util.*

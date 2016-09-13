@@ -52,7 +52,7 @@ class QuandlAPIService private constructor() {
         async() {
             val date = getLatestMarketDateForEOD()
             for (ts in tradeSymbols) {
-                val queryString = "$WIKI_DATABASE$ts.json$APPENDED_KEY&start_date=$date&end_date=$date" // 215.21
+                val queryString = "$WIKI_DATABASE$ts.json$APPENDED_KEY&$date" // 215.21
                 Log.d(TAG, queryString)
                 val response = JSONObject(URL(queryString).readText())
                 val dataset = response.getJSONObject("dataset")
@@ -70,7 +70,7 @@ class QuandlAPIService private constructor() {
      * Utility function that returns the correct date for the most recent EOD stock quotes in the
      * format of yyyy-MM-DD
      */
-    private fun getLatestMarketDateForEOD(): String {
+    private fun getLatestMarketDateForEOD(length: Int = 7): String {
         val ESTCal = GregorianCalendar(TimeZone.getTimeZone("America/New_York"))
         val marketDay = ESTCal.get(Calendar.DAY_OF_WEEK)
 
@@ -95,7 +95,11 @@ class QuandlAPIService private constructor() {
                     ESTCal.add(Calendar.DATE, -1)
             }
         }
+
+
         val sdf = SimpleDateFormat("yyyy-MM-dd", Locale("US"))
-        return sdf.format(ESTCal.time)
+        return String.format("start_date=%s&end_date=%s",
+                sdf.format(ESTCal.time),
+                sdf.format(prevCal.time))
     }
 }
